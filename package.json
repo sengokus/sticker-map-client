@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "format": "prettier --ignore-path .gitignore --write \"**/*.{js,ts,json}\""
   },
   "dependencies": {
     "next": "16.1.6",
