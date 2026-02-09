@@ -6,7 +6,7 @@ const Map = dynamic(() => import("@/app/components/Map"), { ssr: false });
 
 const page = () => {
   return (
-    <div className="bg-amber-100 mx-auto my-5 w-[98%] h-[1000px]">
+    <div className="bg-amber-100 mx-auto my-5 w-[98%] h-250">
       <Map posix={[10.7302, 122.5591]} />
     </div>
   );
