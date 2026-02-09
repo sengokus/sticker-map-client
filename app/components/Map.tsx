@@ -33,8 +33,6 @@ const customIcon = new Icon({
   popupAnchor: [-3, -76], // Point from which the popup should open relative to the iconAnchora
 });
 
-const bounds = new LatLngBounds([10.7302, 122.5591], [10.74, 122.56]);
-
 const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
   return (
     <MapContainer
@@ -48,6 +46,7 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+      {/* icon attribute is for displaying the image */}
       <Marker position={posix} draggable={false} icon={customIcon}>
         <Popup>Hey, I’m a popup!</Popup>
       </Marker>
