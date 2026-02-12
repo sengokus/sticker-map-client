@@ -1,9 +1,9 @@
 import { useMapEvents, Marker } from "react-leaflet";
+import { LatLng } from "leaflet";
 import { useState } from "react";
-import { log } from "console";
 
 const StickerMarkers = () => {
-  const [stickers, setStickers] = useState([]);
+  const [stickers, setStickers] = useState<LatLng[]>([]);
   useMapEvents({
     click(e) {
       const newStickerCoords = e.latlng;
