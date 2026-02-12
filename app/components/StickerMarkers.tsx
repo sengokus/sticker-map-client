@@ -7,7 +7,6 @@ const StickerMarkers = () => {
   useMapEvents({
     click(e) {
       const newStickerCoords = e.latlng;
-      console.log(newStickerCoords);
       setStickers((prevStickers) => [...prevStickers, newStickerCoords]);
     },
   });
