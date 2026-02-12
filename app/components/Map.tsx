@@ -1,17 +1,12 @@
 "use client";
 
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-  ImageOverlay,
-} from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { Icon, LatLngBounds, LatLngExpression, LatLngTuple } from "leaflet";
 
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import "leaflet-defaulticon-compatibility";
+import StickerMarkers from "./StickerMarkers";
 
 interface MapProps {
   posix: LatLngExpression | LatLngTuple;
@@ -50,6 +45,8 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
       <Marker position={posix} draggable={false} icon={customIcon}>
         <Popup>Hey, I’m a popup!</Popup>
       </Marker>
+
+      <StickerMarkers />
     </MapContainer>
   );
 };
