@@ -1,23 +1,19 @@
-import { useMapEvents, Marker } from "react-leaflet";
-import { LatLng } from "leaflet";
-import { useState } from "react";
+import { useMapEvents } from "react-leaflet";
 
-const StickerMarkers = () => {
-  const [stickers, setStickers] = useState<LatLng[]>([]);
+interface StickerMarkerProps {
+  // function to place a sticker on the map, accepting latitude and longitude as parameters
+  placeSticker: (lat: number, lng: number) => void;
+}
+
+const StickerMarkers = ({ placeSticker }: StickerMarkerProps) => {
   useMapEvents({
     click(e) {
       const newStickerCoords = e.latlng;
-      setStickers((prevStickers) => [...prevStickers, newStickerCoords]);
+      placeSticker(newStickerCoords.lat, newStickerCoords.lng);
     },
   });
 
-  return (
-    <>
-      {stickers.map((position, idx) => (
-        <Marker key={`marker-${idx}`} position={position}></Marker>
-      ))}
-    </>
-  );
+  return null;
 };
 
 export default StickerMarkers;
