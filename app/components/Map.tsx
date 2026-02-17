@@ -1,37 +1,39 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { Icon, LatLngExpression, LatLngTuple } from "leaflet";
+import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import { Icon, LatLngExpression, LatLngTuple, LatLngBounds } from "leaflet";
 
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import "leaflet-defaulticon-compatibility";
 import StickerMarkers from "./StickerMarkers";
+import StickerSelector from "./StickerSelector";
 import { useState } from "react";
+import { Bounce, toast } from "react-toastify";
 
 interface MapProps {
   posix: LatLngExpression | LatLngTuple;
   zoom?: number;
 }
 
-const StickerTypes = [
-  "family-food-space",
-  "food-space-for-friends",
-  "food-space-for-tourists",
-  "food-space-needs-work",
-  "food-space-that-i-love",
-  "food-space-w-potential",
-  "food-w-a-view",
-  "heritage-food-space",
-  "inherited-flavors",
-  "market-and-plaza-eats",
-  "spaces-w-food-on-the-go",
-  "truly-ilonggo",
+export const StickerTypes = [
+  { key: "family-food-space", label: "Family Food Space" },
+  { key: "food-space-for-friends", label: "Food Space for Friends" },
+  { key: "food-space-for-tourists", label: "Food Space for Tourists" },
+  { key: "food-space-needs-work", label: "Food Space Needs Work" },
+  { key: "food-space-that-i-love", label: "Food Space That I Love" },
+  { key: "food-space-w-potential", label: "Food Space with Potential" },
+  { key: "food-w-a-view", label: "Food with a View" },
+  { key: "heritage-food-space", label: "Heritage Food Space" },
+  { key: "inherited-flavors", label: "Inherited Flavors" },
+  { key: "market-and-plaza-eats", label: "Market and Plaza Eats" },
+  { key: "spaces-w-food-on-the-go", label: "Spaces with Food on the Go" },
+  { key: "truly-ilonggo", label: "Truly Ilonggo" },
 ] as const;
 
-type StickerType = (typeof StickerTypes)[number];
+export type StickerType = (typeof StickerTypes)[number]["key"];
 
-interface PlacedSticker {
+export interface PlacedSticker {
   lat: number;
   lng: number;
   type: StickerType;
@@ -40,6 +42,9 @@ interface PlacedSticker {
 const defaults = {
   zoom: 19,
 };
+
+// Iloilo City bounds
+const iloiloCityBounds = new LatLngBounds([10.68, 122.5], [10.78, 122.62]);
 
 // helper function to create a Leaflet icon based on the sticker type
 const createIcon = (type: StickerType) => {
@@ -57,11 +62,28 @@ const createIcon = (type: StickerType) => {
 
 const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
   const [stickers, setStickers] = useState<PlacedSticker[]>([]);
-  const [selectedStickerType, setSelectedStickerType] =
-    useState<StickerType>("family-food-space");
+  const [selectedStickerType, setSelectedStickerType] = useState<StickerType>(
+    StickerTypes[0].key,
+  );
 
   // function to handle map clicks and place a new sticker based on the selected type, passed to StickerMarkers component
   const handleMapClick = (lat: number, lng: number) => {
+    if (!iloiloCityBounds.contains([lat, lng])) {
+      toast.warn("Stickers can only be placed within Iloilo City bounds.", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+        style: { width: "330px" },
+      });
+      return;
+    }
+
     const newSticker: PlacedSticker = {
       lat,
       lng,
@@ -71,51 +93,61 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
     setStickers((prevStickers) => [...prevStickers, newSticker]);
   };
 
+  // function to undo the last placed sticker
+  const handleUndo = () => {
+    setStickers((prevStickers) => prevStickers.slice(0, -1));
+  };
+
+  // function to handle submit
+  const handleSubmit = () => {
+    // on click here would be the post request
+    console.log(
+      "Stickers submitted:",
+      stickers.map((sticker) => ({
+        coordinates: [sticker.lat, sticker.lng],
+        type: sticker.type,
+      })),
+    );
+  };
+
   return (
-    <div className="flex flex-col h-screen">
-      <div className="bg-gray-800 p-4 text-white">
-        {/* temporary map for buttons */}
-        {StickerTypes.map((type) => (
-          <button
-            key={type}
-            onClick={() => setSelectedStickerType(type)}
-            className={`mr-2 px-4 hover:cursor-pointer py-2 rounded ${selectedStickerType === type ? "bg-blue-500" : "bg-gray-600"}`}
-          >
-            Pick {type}
-          </button>
-        ))}
-      </div>
-
-      <MapContainer
-        attributionControl={false}
-        center={posix}
-        zoom={zoom}
-        scrollWheelZoom={false}
-        style={{ height: "100%", width: "100%" }}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    <div className="flex flex-col h-screen relative">
+      <div className="relative flex-1">
+        <StickerSelector
+          stickers={stickers}
+          selectedStickerType={selectedStickerType}
+          onSelectSticker={setSelectedStickerType}
+          onUndo={handleUndo}
+          canUndo={stickers.length > 0}
+          onSubmit={handleSubmit}
         />
+        <MapContainer
+          attributionControl={false}
+          center={posix}
+          zoom={zoom}
+          scrollWheelZoom={true}
+          doubleClickZoom={true}
+          maxBounds={iloiloCityBounds}
+          maxBoundsViscosity={1.0}
+          minZoom={13}
+          style={{ height: "100%", width: "100%" }}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
 
-        {stickers.map((placedSticker, idx) => (
-          <Marker
-            key={`marker-${idx}`}
-            position={[placedSticker.lat, placedSticker.lng]}
-            icon={createIcon(placedSticker.type)}
-          ></Marker>
-        ))}
+          {stickers.map((placedSticker, idx) => (
+            <Marker
+              key={`marker-${idx}`}
+              position={[placedSticker.lat, placedSticker.lng]}
+              icon={createIcon(placedSticker.type)}
+            ></Marker>
+          ))}
 
-        <StickerMarkers placeSticker={handleMapClick} />
-      </MapContainer>
-
-      <button
-        // on click here would be the post request
-        onClick={() => console.log("Clicked")}
-        className={`mr-2 px-4 py-2 rounded bg-blue-500 hover:cursor-pointer`}
-      >
-        Submit
-      </button>
+          <StickerMarkers placeSticker={handleMapClick} />
+        </MapContainer>
+      </div>
     </div>
   );
 };
