@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import { Icon, LatLngExpression, LatLngTuple } from "leaflet";
 
 import "leaflet/dist/leaflet.css";
@@ -8,6 +8,13 @@ import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility
 import "leaflet-defaulticon-compatibility";
 import StickerMarkers from "./StickerMarkers";
 import { useState } from "react";
+import SearchField from "./SearchField";
+
+if (!process.env.MAPBOX_API_KEY) {
+  throw new Error(
+    "Missing Mapbox API key. Please set NEXT_PUBLIC_MAPBOX_API_KEY in your environment variables.",
+  );
+}
 
 interface MapProps {
   posix: LatLngExpression | LatLngTuple;
@@ -71,6 +78,7 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
     setStickers((prevStickers) => [...prevStickers, newSticker]);
   };
 
+  const apiKey = process.env.MAPBOX_API_KEY;
   return (
     <div className="flex flex-col h-screen">
       <div className="bg-gray-800 p-4 text-white">
@@ -97,6 +105,8 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+
+        <SearchField apiKey={apiKey!} />
 
         {stickers.map((placedSticker, idx) => (
           <Marker
