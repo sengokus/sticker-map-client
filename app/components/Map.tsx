@@ -1,7 +1,7 @@
 "use client";
 
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
-import { Icon, LatLngExpression, LatLngTuple, LatLngBounds } from "leaflet";
+import { Icon, LatLngExpression, LatLngTuple } from "leaflet";
 
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
@@ -16,12 +16,7 @@ import {
   PlacedSticker,
 } from "../types/stickerTypes";
 import SearchField from "./SearchField";
-
-if (!process.env.MAPBOX_API_KEY) {
-  throw new Error(
-    "Missing Mapbox API key. Please set NEXT_PUBLIC_MAPBOX_API_KEY in your environment variables.",
-  );
-}
+import { iloiloCityBounds } from "../constants/iloilo";
 
 interface MapProps {
   posix: LatLngExpression | LatLngTuple;
@@ -31,9 +26,6 @@ interface MapProps {
 const defaults = {
   zoom: 19,
 };
-
-// Iloilo City bounds
-const iloiloCityBounds = new LatLngBounds([10.68, 122.5], [10.78, 122.62]);
 
 // helper function to create a Leaflet icon based on the sticker type
 const createIcon = (type: StickerType) => {
@@ -100,8 +92,6 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
     );
   };
 
-  const apiKey = process.env.MAPBOX_API_KEY;
-
   return (
     <div className="flex flex-col h-screen relative">
       <div className="relative flex-1">
@@ -129,7 +119,7 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          <SearchField apiKey={apiKey!} />
+          <SearchField />
 
           {stickers.map((placedSticker, idx) => (
             <Marker

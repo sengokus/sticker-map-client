@@ -24,3 +24,11 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.leaflet-control-geosearch form input,
+.leaflet-control-geosearch form input::placeholder {
+  color: #171717 !important;
+}
+.leaflet-control-geosearch .results > * {
+  color: #171717 !important;
+}
