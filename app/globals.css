@@ -27,8 +27,8 @@ body {
 
 .leaflet-control-geosearch form input,
 .leaflet-control-geosearch form input::placeholder {
-  color: #171717 !important;
+  color: #000000 !important;
 }
 .leaflet-control-geosearch .results > * {
-  color: #171717 !important;
+  color: #000000 !important;
 }
