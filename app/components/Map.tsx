@@ -14,7 +14,22 @@ interface MapProps {
   zoom?: number;
 }
 
-type StickerType = "1" | "2";
+const StickerTypes = [
+  "family-food-space",
+  "food-space-for-friends",
+  "food-space-for-tourists",
+  "food-space-needs-work",
+  "food-space-that-i-love",
+  "food-space-w-potential",
+  "food-w-a-view",
+  "heritage-food-space",
+  "inherited-flavors",
+  "market-and-plaza-eats",
+  "spaces-w-food-on-the-go",
+  "truly-ilonggo",
+] as const;
+
+type StickerType = (typeof StickerTypes)[number];
 
 interface PlacedSticker {
   lat: number;
@@ -28,16 +43,13 @@ const defaults = {
 
 // helper function to create a Leaflet icon based on the sticker type
 const createIcon = (type: StickerType) => {
-  const iconUrl =
-    type === "1"
-      ? "https://pbs.twimg.com/media/E9opYWXUUAcBVTv.jpg"
-      : "https://pbs.twimg.com/media/FEEEhJ9aIAAHE67.jpg"; // Replace with actual URLs for different sticker types
+  const iconUrl = `/${type}.png`; // Assuming your sticker images are in the public/stickers directory
   return new Icon({
     iconUrl: iconUrl,
     // shadowUrl: 'path/to/your/marker-shadow.png', // Optional shadow
-    iconSize: [90, 95], // Size of the icon
+    iconSize: [100, 100], // Size of the icon
     // shadowSize: [50, 64], // Size of the shadow
-    iconAnchor: [22, 94], // Point of the icon which corresponds to marker's location
+    iconAnchor: [50, 50], // Point of the icon which corresponds to marker's location
     // shadowAnchor: [4, 62], // The same for the shadow
     popupAnchor: [-3, -76], // Point from which the popup should open relative to the iconAnchora
   });
@@ -46,7 +58,7 @@ const createIcon = (type: StickerType) => {
 const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
   const [stickers, setStickers] = useState<PlacedSticker[]>([]);
   const [selectedStickerType, setSelectedStickerType] =
-    useState<StickerType>("1");
+    useState<StickerType>("family-food-space");
 
   // function to handle map clicks and place a new sticker based on the selected type, passed to StickerMarkers component
   const handleMapClick = (lat: number, lng: number) => {
@@ -63,7 +75,7 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
     <div className="flex flex-col h-screen">
       <div className="bg-gray-800 p-4 text-white">
         {/* temporary map for buttons */}
-        {(["1", "2"] as StickerType[]).map((type) => (
+        {StickerTypes.map((type) => (
           <button
             key={type}
             onClick={() => setSelectedStickerType(type)}
