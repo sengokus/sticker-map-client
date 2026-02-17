@@ -53,7 +53,7 @@ const StickerSelector = ({
             <button
               onClick={onSubmit}
               disabled={stickers.length === 0}
-              className="md:p-2 p-1 w-20 rounded-full transition-all flex items-center justify-center bg-[#48BF7E] hover:bg-[#48BF7E]/80 cursor-pointer md:text-[16px] text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="md:p-2 p-1 w-20 rounded-full transition-all flex items-center justify-center bg-[#48BF7E] hover:bg-[#48BF7E]/80 cursor-pointer text-white md:text-[16px] text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Submit
             </button>
