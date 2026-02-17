@@ -10,33 +10,15 @@ import StickerMarkers from "./StickerMarkers";
 import StickerSelector from "./StickerSelector";
 import { useState } from "react";
 import { Bounce, toast } from "react-toastify";
+import {
+  StickerTypes,
+  StickerType,
+  PlacedSticker,
+} from "../types/stickerTypes";
 
 interface MapProps {
   posix: LatLngExpression | LatLngTuple;
   zoom?: number;
-}
-
-export const StickerTypes = [
-  { key: "family-food-space", label: "Family Food Space" },
-  { key: "food-space-for-friends", label: "Food Space for Friends" },
-  { key: "food-space-for-tourists", label: "Food Space for Tourists" },
-  { key: "food-space-needs-work", label: "Food Space Needs Work" },
-  { key: "food-space-that-i-love", label: "Food Space That I Love" },
-  { key: "food-space-w-potential", label: "Food Space with Potential" },
-  { key: "food-w-a-view", label: "Food with a View" },
-  { key: "heritage-food-space", label: "Heritage Food Space" },
-  { key: "inherited-flavors", label: "Inherited Flavors" },
-  { key: "market-and-plaza-eats", label: "Market and Plaza Eats" },
-  { key: "spaces-w-food-on-the-go", label: "Spaces with Food on the Go" },
-  { key: "truly-ilonggo", label: "Truly Ilonggo" },
-] as const;
-
-export type StickerType = (typeof StickerTypes)[number]["key"];
-
-export interface PlacedSticker {
-  lat: number;
-  lng: number;
-  type: StickerType;
 }
 
 const defaults = {
@@ -70,6 +52,7 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
   const handleMapClick = (lat: number, lng: number) => {
     if (!iloiloCityBounds.contains([lat, lng])) {
       toast.warn("Stickers can only be placed within Iloilo City bounds.", {
+        toastId: "bounds-warning",
         position: "top-center",
         autoClose: 3000,
         hideProgressBar: false,

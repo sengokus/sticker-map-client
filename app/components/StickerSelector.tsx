@@ -1,6 +1,10 @@
 "use client";
 
-import { PlacedSticker, StickerType, StickerTypes } from "./Map";
+import {
+  PlacedSticker,
+  StickerType,
+  StickerTypes,
+} from "../types/stickerTypes";
 import Image from "next/image";
 
 interface StickerSelectorProps {
@@ -23,15 +27,15 @@ const StickerSelector = ({
   return (
     <div className="absolute bottom-4 left-4 z-[1000] bg-white rounded-lg shadow-lg max-h-[35vh] max-w-[50vh] overflow-hidden flex flex-col">
       <div className="sticky top-0 bg-white z-10 p-4 pb-3 border-b border-gray-200">
-        <div className="flex justify-between items-center">
-          <div className="text-md font-bold text-[#48BF7E]">
+        <div className="flex justify-between items-center md:gap-0 gap-2">
+          <div className="md:text-[16px] text-xs font-bold text-[#48BF7E]">
             Select a sticker:
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center md:gap-2 gap-1">
             <button
               onClick={onUndo}
               disabled={!canUndo}
-              className={`p-2 rounded-full transition-all flex items-center justify-center ${
+              className={`md:p-2 p-1 rounded-full transition-all flex items-center justify-center ${
                 canUndo
                   ? "bg-[#48BF7E] hover:bg-[#48BF7E]/80 cursor-pointer"
                   : "bg-gray-300 hover:bg-gray-300/80 cursor-not-allowed opacity-50"
@@ -43,13 +47,13 @@ const StickerSelector = ({
                 alt="Undo"
                 width={20}
                 height={20}
-                className={canUndo ? "brightness-0 invert" : ""}
+                className={`h-4 w-4 md:h-full md:w-full ${canUndo ? "brightness-0 invert" : ""}`}
               />
             </button>
             <button
               onClick={onSubmit}
               disabled={stickers.length === 0}
-              className="p-2 w-20 rounded-full transition-all flex items-center justify-center bg-[#48BF7E] hover:bg-[#48BF7E]/80 cursor-pointer text-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="md:p-2 p-1 w-20 rounded-full transition-all flex items-center justify-center bg-[#48BF7E] hover:bg-[#48BF7E]/80 cursor-pointer md:text-[16px] text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Submit
             </button>
@@ -63,7 +67,7 @@ const StickerSelector = ({
               <button
                 key={sticker.key}
                 onClick={() => onSelectSticker(sticker.key)}
-                className={`flex flex-col items-center p-3 rounded-lg transition-all hover:scale-105 ${
+                className={`flex flex-col items-center md:p-3 p-2 rounded-lg transition-all hover:scale-105 ${
                   selectedStickerType === sticker.key
                     ? "bg-blue-100 ring-2 ring-blue-500"
                     : "bg-gray-50 hover:bg-gray-100"
