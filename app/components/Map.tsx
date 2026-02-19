@@ -81,8 +81,25 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
   };
 
   // function to handle submit
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+
+    const payload = stickers.map((sticker) => ({
+      lat: sticker.lat,
+      lng: sticker.lng,
+      sticker_type: sticker.type,
+    }));
+
     // on click here would be the post request
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/locations`,{
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({stickers:payload })
+    })
+
+    
+
     console.log(
       "Stickers submitted:",
       stickers.map((sticker) => ({
@@ -90,6 +107,8 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
         type: sticker.type,
       })),
     );
+
+
   };
 
   return (
