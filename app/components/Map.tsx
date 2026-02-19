@@ -73,6 +73,7 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
     };
 
     setStickers((prevStickers) => [...prevStickers, newSticker]);
+    handleSubmit();
   };
 
   // function to undo the last placed sticker
@@ -90,7 +91,7 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
     }));
 
     // on click here would be the post request
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/locations`,{
+    fetch(`${process.env.NEXT_PUBLIC_API_SERVER}/api/locations`,{
       method: "post",
       headers: {
         "Content-Type": "application/json",
