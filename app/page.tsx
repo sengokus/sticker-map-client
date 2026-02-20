@@ -8,16 +8,22 @@ const Map = dynamic(() => import("@/app/components/Map"), { ssr: false });
 
 const Page = () => {
   const [showMap, setShowMap] = useState(false);
+  const [username, SetUserame] = useState<string>("");
+
+  const onSurveyComplete = (name: string) =>{
+    SetUserame(name);
+    setShowMap(true);
+  }
 
   return (
     <main className="flex flex-col items-center justify-center h-screen w-screen relative bg-white">
       <div className="mx-auto my-5 w-full h-250 relative z-10">
-        <Map posix={[10.7302, 122.5591]} />
+        <Map posix={[10.7302, 122.5591]}  username={username} />
       </div>
       {!showMap && (
         <>
           <div className="fixed inset-0 bg-white/70 backdrop-blur-sm z-[1999]" />
-          <SurveyDialogs onComplete={() => setShowMap(true)} />
+          <SurveyDialogs onComplete={onSurveyComplete} />
         </>
       )}
     </main>

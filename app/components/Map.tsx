@@ -21,6 +21,7 @@ import { iloiloCityBounds } from "../constants/iloilo";
 interface MapProps {
   posix: LatLngExpression | LatLngTuple;
   zoom?: number;
+  username?: string;
 }
 
 const defaults = {
@@ -41,7 +42,7 @@ const createIcon = (type: StickerType) => {
   });
 };
 
-const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
+const Map = ({ zoom = defaults.zoom, posix, username }: MapProps) => {
   const [stickers, setStickers] = useState<PlacedSticker[]>([]);
   const [selectedStickerType, setSelectedStickerType] = useState<StickerType>(
     StickerTypes[0].key,
@@ -73,6 +74,7 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
     };
 
     setStickers((prevStickers) => [...prevStickers, newSticker]);
+    
   };
 
   // function to undo the last placed sticker
@@ -81,8 +83,26 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
   };
 
   // function to handle submit
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+
+    const payload = stickers.map((sticker) => ({
+      lat: sticker.lat,
+      lng: sticker.lng,
+      sticker_type: sticker.type,
+      name: username
+    }));
+
     // on click here would be the post request
+    fetch(`${process.env.NEXT_PUBLIC_API_SERVER}/api/locations`,{
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({stickers:payload })
+    })
+
+    
+
     console.log(
       "Stickers submitted:",
       stickers.map((sticker) => ({
