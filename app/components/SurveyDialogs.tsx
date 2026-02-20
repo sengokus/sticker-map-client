@@ -5,7 +5,7 @@ import Image from "next/image";
 import { StickerTypes } from "../types/stickerTypes";
 
 interface SurveyDialogsProps {
-  onComplete: (name:string) => void;
+  onComplete: (name: string) => void;
 }
 
 type DialogStep =
@@ -35,9 +35,23 @@ const SurveyDialogs = ({ onComplete }: SurveyDialogsProps) => {
   };
 
   const handleBegin = () => {
-
     onComplete(name);
   };
+
+  const handleBack = () => {
+    if (currentStep === "instructions-part1") {
+      setCurrentStep("welcome");
+    } else if (currentStep === "instructions-part2") {
+      setCurrentStep("instructions-part1");
+    } else if (currentStep === "thank-you") {
+      setCurrentStep("instructions-part2");
+    }
+  };
+
+  const showBackButton =
+    currentStep === "instructions-part1" ||
+    currentStep === "instructions-part2" ||
+    currentStep === "thank-you";
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-[2000]">
@@ -131,12 +145,24 @@ const SurveyDialogs = ({ onComplete }: SurveyDialogsProps) => {
                   architectural and spatial expressions.
                 </p>
               </div>
-              <button
-                onClick={handleNext}
-                className="mt-6 w-full py-3 px-6 rounded-[25px] font-medium bg-[#48BF7E] hover:bg-[#48BF7E]/80 text-white transition-all cursor-pointer"
-              >
-                Next
-              </button>
+              <div className="mt-6 flex gap-3">
+                {showBackButton && (
+                  <button
+                    onClick={handleBack}
+                    className="flex-1 py-3 px-6 rounded-[25px] font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+                  >
+                    Back
+                  </button>
+                )}
+                <button
+                  onClick={handleNext}
+                  className={`py-3 px-6 rounded-[25px] font-medium bg-[#48BF7E] hover:bg-[#48BF7E]/80 text-white transition-all cursor-pointer ${
+                    showBackButton ? "flex-1" : "w-full"
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
             </>
           )}
 
@@ -207,12 +233,24 @@ const SurveyDialogs = ({ onComplete }: SurveyDialogsProps) => {
                   </li>
                 </ol>
               </div>
-              <button
-                onClick={handleNext}
-                className="mt-6 w-full py-3 px-6 rounded-[25px] font-medium bg-[#48BF7E] hover:bg-[#48BF7E]/80 text-white transition-all cursor-pointer"
-              >
-                Next
-              </button>
+              <div className="mt-6 flex gap-3">
+                {showBackButton && (
+                  <button
+                    onClick={handleBack}
+                    className="flex-1 py-3 px-6 rounded-[25px] font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+                  >
+                    Back
+                  </button>
+                )}
+                <button
+                  onClick={handleNext}
+                  className={`py-3 px-6 rounded-[25px] font-medium bg-[#48BF7E] hover:bg-[#48BF7E]/80 text-white transition-all cursor-pointer ${
+                    showBackButton ? "flex-1" : "w-full"
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
             </>
           )}
 
@@ -225,12 +263,24 @@ const SurveyDialogs = ({ onComplete }: SurveyDialogsProps) => {
                   space in Iloilo City.
                 </p>
               </div>
-              <button
-                onClick={handleBegin}
-                className="mt-6 w-full py-3 px-6 rounded-[25px] font-medium bg-[#48BF7E] hover:bg-[#48BF7E]/80 text-white transition-all cursor-pointer"
-              >
-                Begin
-              </button>
+              <div className="mt-6 flex gap-3">
+                {showBackButton && (
+                  <button
+                    onClick={handleBack}
+                    className="flex-1 py-3 px-6 rounded-[25px] font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+                  >
+                    Back
+                  </button>
+                )}
+                <button
+                  onClick={handleBegin}
+                  className={`py-3 px-6 rounded-[25px] font-medium bg-[#48BF7E] hover:bg-[#48BF7E]/80 text-white transition-all cursor-pointer ${
+                    showBackButton ? "flex-1" : "w-full"
+                  }`}
+                >
+                  Begin
+                </button>
+              </div>
             </>
           )}
         </div>

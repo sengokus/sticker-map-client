@@ -8,6 +8,7 @@ import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility
 import "leaflet-defaulticon-compatibility";
 import StickerMarkers from "./StickerMarkers";
 import StickerSelector from "./StickerSelector";
+import ConfirmDialog from "./ConfirmDialog";
 import { useState } from "react";
 import { Bounce, toast } from "react-toastify";
 import {
@@ -17,11 +18,13 @@ import {
 } from "../types/stickerTypes";
 import SearchField from "./SearchField";
 import { iloiloCityBounds } from "../constants/iloilo";
+import { SUBMITTED_KEY } from "../constants/survey";
 
 interface MapProps {
   posix: LatLngExpression | LatLngTuple;
   zoom?: number;
   username?: string;
+  onSubmittedSuccess?: () => void;
 }
 
 const defaults = {
@@ -42,31 +45,21 @@ const createIcon = (type: StickerType) => {
   });
 };
 
-const Map = ({ zoom = defaults.zoom, posix, username }: MapProps) => {
+const Map = ({
+  zoom = defaults.zoom,
+  posix,
+  username,
+  onSubmittedSuccess,
+}: MapProps) => {
   const [stickers, setStickers] = useState<PlacedSticker[]>([]);
   const [selectedStickerType, setSelectedStickerType] = useState<StickerType>(
     StickerTypes[0].key,
   );
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // function to handle map clicks and place a new sticker based on the selected type, passed to StickerMarkers component
   const handleMapClick = (lat: number, lng: number) => {
-    if (!iloiloCityBounds.contains([lat, lng])) {
-      toast.warn("Stickers can only be placed within Iloilo City bounds.", {
-        toastId: "bounds-warning",
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
-        style: { width: "330px" },
-      });
-      return;
-    }
-
     const newSticker: PlacedSticker = {
       lat,
       lng,
@@ -74,7 +67,6 @@ const Map = ({ zoom = defaults.zoom, posix, username }: MapProps) => {
     };
 
     setStickers((prevStickers) => [...prevStickers, newSticker]);
-    
   };
 
   // function to undo the last placed sticker
@@ -82,34 +74,59 @@ const Map = ({ zoom = defaults.zoom, posix, username }: MapProps) => {
     setStickers((prevStickers) => prevStickers.slice(0, -1));
   };
 
-  // function to handle submit
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmSubmit = async () => {
+    setIsSubmitting(true);
 
     const payload = stickers.map((sticker) => ({
       lat: sticker.lat,
       lng: sticker.lng,
       sticker_type: sticker.type,
-      name: username
+      name: username,
     }));
 
-    // on click here would be the post request
-    fetch(`${process.env.NEXT_PUBLIC_API_SERVER}/api/locations`,{
-      method: "post",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({stickers:payload })
-    })
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_SERVER}/api/locations`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ stickers: payload }),
+        },
+      );
 
-    
+      if (!response.ok) {
+        throw new Error("Submission failed");
+      }
 
-    console.log(
-      "Stickers submitted:",
-      stickers.map((sticker) => ({
-        coordinates: [sticker.lat, sticker.lng],
-        type: sticker.type,
-      })),
-    );
+      localStorage.setItem(SUBMITTED_KEY, "true");
+      setShowConfirmDialog(false);
+      setIsSubmitting(false);
+      onSubmittedSuccess?.();
+      toast.success("Thank you! Your response has been submitted.", {
+        toastId: "submit-success",
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        theme: "light",
+        transition: Bounce,
+      });
+    } catch {
+      setIsSubmitting(false);
+      toast.error("Something went wrong. Please try again.", {
+        toastId: "submit-error",
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        theme: "light",
+        transition: Bounce,
+      });
+    }
   };
 
   return (
@@ -152,6 +169,17 @@ const Map = ({ zoom = defaults.zoom, posix, username }: MapProps) => {
           <StickerMarkers placeSticker={handleMapClick} />
         </MapContainer>
       </div>
+
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        title="Submit Response"
+        subtitle="Are you sure you want to submit your response? You can only respond to this survey once."
+        confirmLabel="Submit"
+        cancelLabel="Cancel"
+        onConfirm={handleConfirmSubmit}
+        onCancel={() => setShowConfirmDialog(false)}
+        isSubmitting={isSubmitting}
+      />
     </div>
   );
 };

@@ -3,22 +3,28 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import SurveyDialogs from "./components/SurveyDialogs";
+import { useSubmission } from "./components/SubmissionGuard";
 
 const Map = dynamic(() => import("@/app/components/Map"), { ssr: false });
 
 const Page = () => {
   const [showMap, setShowMap] = useState(false);
-  const [username, SetUserame] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
+  const { setSubmitted } = useSubmission();
 
-  const onSurveyComplete = (name: string) =>{
-    SetUserame(name);
+  const onSurveyComplete = (name: string) => {
+    setUsername(name);
     setShowMap(true);
-  }
+  };
 
   return (
     <main className="flex flex-col items-center justify-center h-screen w-screen relative bg-white">
       <div className="mx-auto my-5 w-full h-250 relative z-10">
-        <Map posix={[10.7302, 122.5591]}  username={username} />
+        <Map
+          posix={[10.7302, 122.5591]}
+          username={username}
+          onSubmittedSuccess={setSubmitted}
+        />
       </div>
       {!showMap && (
         <>
