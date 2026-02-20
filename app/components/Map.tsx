@@ -21,6 +21,7 @@ import { iloiloCityBounds } from "../constants/iloilo";
 interface MapProps {
   posix: LatLngExpression | LatLngTuple;
   zoom?: number;
+  username?: string;
 }
 
 const defaults = {
@@ -41,7 +42,7 @@ const createIcon = (type: StickerType) => {
   });
 };
 
-const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
+const Map = ({ zoom = defaults.zoom, posix, username }: MapProps) => {
   const [stickers, setStickers] = useState<PlacedSticker[]>([]);
   const [selectedStickerType, setSelectedStickerType] = useState<StickerType>(
     StickerTypes[0].key,
@@ -73,7 +74,7 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
     };
 
     setStickers((prevStickers) => [...prevStickers, newSticker]);
-    handleSubmit();
+    
   };
 
   // function to undo the last placed sticker
@@ -88,6 +89,7 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
       lat: sticker.lat,
       lng: sticker.lng,
       sticker_type: sticker.type,
+      name: username
     }));
 
     // on click here would be the post request
@@ -108,8 +110,6 @@ const Map = ({ zoom = defaults.zoom, posix }: MapProps) => {
         type: sticker.type,
       })),
     );
-
-
   };
 
   return (

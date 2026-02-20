@@ -5,7 +5,7 @@ import Image from "next/image";
 import { StickerTypes } from "../types/stickerTypes";
 
 interface SurveyDialogsProps {
-  onComplete: () => void;
+  onComplete: (name:string) => void;
 }
 
 type DialogStep =
@@ -35,7 +35,8 @@ const SurveyDialogs = ({ onComplete }: SurveyDialogsProps) => {
   };
 
   const handleBegin = () => {
-    onComplete();
+
+    onComplete(name);
   };
 
   return (
