@@ -1,7 +1,7 @@
 "use client";
 
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
-import { Icon, LatLngExpression, LatLngTuple } from "leaflet";
+import { LatLngExpression, LatLngTuple } from "leaflet";
 
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
@@ -18,7 +18,8 @@ import {
 } from "../types/stickerTypes";
 import SearchField from "./SearchField";
 import { iloiloCityBounds } from "../constants/iloilo";
-import { SUBMITTED_KEY } from "../constants/survey";
+import { createIcon } from "../lib/stickerIcon";
+import { useSubmitResponse } from "../hooks/useSubmitResponse";
 
 interface MapProps {
   posix: LatLngExpression | LatLngTuple;
@@ -27,27 +28,14 @@ interface MapProps {
   onSubmittedSuccess?: () => void;
 }
 
-const defaults = {
+export const mapDefaults = {
   zoom: 19,
-};
-
-// helper function to create a Leaflet icon based on the sticker type
-const createIcon = (type: StickerType) => {
-  const iconUrl = `/${type}.png`; // Assuming your sticker images are in the public/stickers directory
-  return new Icon({
-    iconUrl: iconUrl,
-    // shadowUrl: 'path/to/your/marker-shadow.png', // Optional shadow
-    iconSize: [100, 100], // Size of the icon
-    // shadowSize: [50, 64], // Size of the shadow
-    iconAnchor: [50, 50], // Point of the icon which corresponds to marker's location
-    // shadowAnchor: [4, 62], // The same for the shadow
-    popupAnchor: [-3, -76], // Point from which the popup should open relative to the iconAnchora
-  });
+  center: [10.7302, 122.5591] as LatLngTuple,
 };
 
 const Map = ({
-  zoom = defaults.zoom,
-  posix,
+  zoom = mapDefaults.zoom,
+  posix = mapDefaults.center,
   username,
   onSubmittedSuccess,
 }: MapProps) => {
@@ -56,7 +44,7 @@ const Map = ({
     StickerTypes[0].key,
   );
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitResponse = useSubmitResponse();
 
   // function to handle map clicks and place a new sticker based on the selected type, passed to StickerMarkers component
   const handleMapClick = (lat: number, lng: number) => {
@@ -78,55 +66,53 @@ const Map = ({
     setShowConfirmDialog(true);
   };
 
-  const handleConfirmSubmit = async () => {
-    setIsSubmitting(true);
+  const handleConfirmSubmit = () => {
+    const payload = {
+      stickers: stickers.map((s) => ({
+        lat: s.lat,
+        lng: s.lng,
+        sticker_type: s.type,
+      })),
+      ...(username && { username }),
+    };
 
-    const payload = stickers.map((sticker) => ({
-      lat: sticker.lat,
-      lng: sticker.lng,
-      sticker_type: sticker.type,
-      name: username,
-    }));
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_SERVER}/api/locations`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+    submitResponse.mutate(payload, {
+      onSuccess: (data) => {
+        setShowConfirmDialog(false);
+        onSubmittedSuccess?.();
+        if (data.alreadyResponded) {
+          return;
+        }
+        if (data.success) {
+          toast.success(
+            data.message ?? "Your response has been submitted successfully!",
+            {
+              toastId: "submit-success",
+              position: "top-center",
+              autoClose: 3000,
+              hideProgressBar: false,
+              theme: "light",
+              transition: Bounce,
+            },
+          );
+        }
+      },
+      onError: (err) => {
+        toast.error(
+          err instanceof Error
+            ? err.message
+            : "Something went wrong. Please try again.",
+          {
+            toastId: "submit-error",
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            theme: "light",
+            transition: Bounce,
           },
-          body: JSON.stringify({ stickers: payload }),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Submission failed");
-      }
-
-      localStorage.setItem(SUBMITTED_KEY, "true");
-      setShowConfirmDialog(false);
-      setIsSubmitting(false);
-      onSubmittedSuccess?.();
-      toast.success("Thank you! Your response has been submitted.", {
-        toastId: "submit-success",
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        theme: "light",
-        transition: Bounce,
-      });
-    } catch {
-      setIsSubmitting(false);
-      toast.error("Something went wrong. Please try again.", {
-        toastId: "submit-error",
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        theme: "light",
-        transition: Bounce,
-      });
-    }
+        );
+      },
+    });
   };
 
   return (
@@ -178,7 +164,7 @@ const Map = ({
         cancelLabel="Cancel"
         onConfirm={handleConfirmSubmit}
         onCancel={() => setShowConfirmDialog(false)}
-        isSubmitting={isSubmitting}
+        isSubmitting={submitResponse.isPending}
       />
     </div>
   );
