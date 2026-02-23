@@ -1,7 +1,7 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker } from "react-leaflet";
-import { LatLngExpression, LatLngTuple } from "leaflet";
+import { MapContainer, TileLayer, Marker, GeoJSON } from "react-leaflet";
+import { LatLngExpression, LatLngTuple, Polygon } from "leaflet";
 
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
@@ -20,6 +20,10 @@ import SearchField from "./SearchField";
 import { iloiloCityBounds } from "../constants/iloilo";
 import { createIcon } from "../lib/stickerIcon";
 import { useSubmitResponse } from "../hooks/useSubmitResponse";
+import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+import { point } from "@turf/helpers";
+import iloiloCityGeoJson from "../data/iloiloCityGeoJson.json"; // Your GeoJSON file
+import iloiloProvinceJson from "../data/iloiloProvince.json"; // Your GeoJSON file
 
 interface MapProps {
   posix: LatLngExpression | LatLngTuple;
@@ -47,14 +51,25 @@ const Map = ({
   const submitResponse = useSubmitResponse();
 
   // function to handle map clicks and place a new sticker based on the selected type, passed to StickerMarkers component
+  const combinedGeoJson = {
+    type: "FeatureCollection",
+    features: [...iloiloCityGeoJson.features, ...iloiloProvinceJson.features],
+  };
   const handleMapClick = (lat: number, lng: number) => {
-    const newSticker: PlacedSticker = {
-      lat,
-      lng,
-      type: selectedStickerType,
-    };
+    const pt = point([lng, lat]);
+    const poly = combinedGeoJson.features[0].geometry as any;
 
-    setStickers((prevStickers) => [...prevStickers, newSticker]);
+    if (booleanPointInPolygon(pt, poly)) {
+      const newSticker: PlacedSticker = {
+        lat,
+        lng,
+        type: selectedStickerType,
+      };
+
+      setStickers((prevStickers) => [...prevStickers, newSticker]);
+    } else {
+      console.log("Outside the province boundary!");
+    }
   };
 
   // function to undo the last placed sticker
@@ -140,6 +155,11 @@ const Map = ({
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <GeoJSON
+            data={combinedGeoJson as any}
+            style={{ color: "blue", weight: 1, fillOpacity: 0.2 }}
+            interactive={false} // Important: allows clicks to pass through to the map
           />
 
           <SearchField />
