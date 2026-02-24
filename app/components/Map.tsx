@@ -57,6 +57,7 @@ const Map = ({
   };
   const handleMapClick = (lat: number, lng: number) => {
     const pt = point([lng, lat]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const poly = combinedGeoJson.features[0].geometry as any;
 
     if (booleanPointInPolygon(pt, poly)) {
@@ -68,7 +69,14 @@ const Map = ({
 
       setStickers((prevStickers) => [...prevStickers, newSticker]);
     } else {
-      console.log("Outside the province boundary!");
+      toast.error("Please place the sticker within the province boundary!", {
+        toastId: "submit-error",
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        theme: "light",
+        transition: Bounce,
+      });
     }
   };
 
@@ -157,8 +165,9 @@ const Map = ({
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           <GeoJSON
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             data={combinedGeoJson as any}
-            style={{ color: "blue", weight: 1, fillOpacity: 0.2 }}
+            style={{ color: "blue", weight: 1, fillOpacity: 0 }}
             interactive={false} // Important: allows clicks to pass through to the map
           />
 
