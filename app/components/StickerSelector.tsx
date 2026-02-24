@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   PlacedSticker,
   StickerType,
@@ -24,12 +25,61 @@ const StickerSelector = ({
   canUndo,
   onSubmit,
 }: StickerSelectorProps) => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  if (isCollapsed) {
+    return (
+      <button
+        onClick={() => setIsCollapsed(false)}
+        className="absolute bottom-4 left-4 z-[1000] bg-white rounded-lg shadow-lg px-4 py-2 flex items-center gap-2 hover:bg-gray-50 transition-colors"
+        title="Expand sticker selector"
+      >
+        <span className="text-sm font-bold text-[#48BF7E]">Stickers</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="text-gray-500"
+        >
+          <path d="m18 15-6-6-6 6" />
+        </svg>
+      </button>
+    );
+  }
+
   return (
     <div className="absolute bottom-4 left-4 z-[1000] bg-white rounded-lg shadow-lg max-h-[35vh] max-w-[50vh] overflow-hidden flex flex-col">
       <div className="sticky top-0 bg-white z-10 p-4 pb-3 border-b border-gray-200">
         <div className="flex justify-between items-center md:gap-0 gap-2">
-          <div className="md:text-[16px] text-xs font-bold text-[#48BF7E]">
-            Select a sticker:
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsCollapsed(true)}
+              className="p-1 rounded hover:bg-gray-100 transition-colors cursor-pointer"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-gray-500"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            <span className="md:text-[16px] text-xs font-bold text-[#48BF7E]">
+              Select a sticker:
+            </span>
           </div>
           <div className="flex items-center md:gap-2 gap-1">
             <button
