@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import SurveyDialogs from "./components/SurveyDialogs";
 import { useSubmission } from "./components/SubmissionGuard";
+import { mapDefaults } from "@/app/components/Map";
 
 const Map = dynamic(() => import("@/app/components/Map"), { ssr: false });
 
@@ -21,7 +22,7 @@ const Page = () => {
     <main className="flex flex-col items-center justify-center h-screen w-screen relative bg-white">
       <div className="mx-auto my-5 w-full h-250 relative z-10">
         <Map
-          posix={[10.7302, 122.5591]}
+          posix={mapDefaults.center}
           username={username}
           onSubmittedSuccess={setSubmitted}
         />

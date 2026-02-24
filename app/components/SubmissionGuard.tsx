@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, createContext, useContext } from "react";
-import { SUBMITTED_KEY } from "../constants/survey";
+import { usePathname } from "next/navigation";
+import { supabase } from "../lib/supabase";
+import { getResponseStatus } from "../network/locations";
 
 const SubmissionContext = createContext<{
   setSubmitted: () => void;
@@ -9,22 +11,57 @@ const SubmissionContext = createContext<{
 
 export function useSubmission() {
   const ctx = useContext(SubmissionContext);
-  if (!ctx) throw new Error("useSubmission must be used within SubmissionGuard");
+  if (!ctx)
+    throw new Error("useSubmission must be used within SubmissionGuard");
   return ctx;
 }
 
 export function SubmissionGuard({ children }: { children: React.ReactNode }) {
-  const [isSubmitted, setIsSubmitted] = useState<boolean | null>(null);
+  const pathname = usePathname();
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const submitted = localStorage.getItem(SUBMITTED_KEY) === "true";
-    const id = requestAnimationFrame(() => setIsSubmitted(submitted));
-    return () => cancelAnimationFrame(id);
-  }, []);
+    if (pathname?.startsWith("/admin")) return;
+
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      let session = data?.session;
+
+      if (!session) {
+        // sign in anonymously to track if user has already submitted a response
+        const { data: signInData, error } =
+          await supabase.auth.signInAnonymously();
+        if (error) {
+          console.error("Anonymous sign-in failed:", error);
+          setIsReady(true);
+          return;
+        }
+        session = signInData.session;
+      }
+
+      if (session?.access_token) {
+        try {
+          const { hasResponded } = await getResponseStatus(
+            session.access_token,
+          );
+          if (hasResponded) setIsSubmitted(true);
+        } catch {
+          // do not throw if status is not available
+        }
+      }
+
+      setIsReady(true);
+    })();
+  }, [pathname]);
+
+  if (pathname?.startsWith("/admin")) {
+    return <>{children}</>;
+  }
 
   const setSubmitted = () => setIsSubmitted(true);
 
-  if (isSubmitted === null) {
+  if (!isReady) {
     return null;
   }
 
