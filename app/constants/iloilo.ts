@@ -2,10 +2,11 @@ import { LatLngBounds } from "leaflet";
 
 // Iloilo City geographic bounds
 export const ILOILO_BOUNDS = {
-  minLat: 10.68,
-  maxLat: 10.78,
-  minLng: 122.5,
-  maxLng: 122.62,
+  // based on city GeoJSON extent with a small buffer
+  minLat: 10.62,
+  maxLat: 10.79,
+  minLng: 122.47,
+  maxLng: 122.63,
 } as const;
 
 export const iloiloCityBounds = new LatLngBounds(

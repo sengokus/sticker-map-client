@@ -20,10 +20,6 @@ import SearchField from "./SearchField";
 import { iloiloCityBounds } from "../constants/iloilo";
 import { createIcon } from "../lib/stickerIcon";
 import { useSubmitResponse } from "../hooks/useSubmitResponse";
-import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
-import { point } from "@turf/helpers";
-import iloiloCityGeoJson from "../data/iloiloCityGeoJson.json"; // Your GeoJSON file
-import iloiloProvinceJson from "../data/iloiloProvince.json"; // Your GeoJSON file
 
 interface MapProps {
   posix: LatLngExpression | LatLngTuple;
@@ -33,7 +29,7 @@ interface MapProps {
 }
 
 export const mapDefaults = {
-  zoom: 19,
+  zoom: 14,
   center: [10.7302, 122.5591] as LatLngTuple,
 };
 
@@ -50,34 +46,14 @@ const Map = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const submitResponse = useSubmitResponse();
 
-  // function to handle map clicks and place a new sticker based on the selected type, passed to StickerMarkers component
-  const combinedGeoJson = {
-    type: "FeatureCollection",
-    features: [...iloiloCityGeoJson.features, ...iloiloProvinceJson.features],
-  };
   const handleMapClick = (lat: number, lng: number) => {
-    const pt = point([lng, lat]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const poly = combinedGeoJson.features[0].geometry as any;
+    const newSticker: PlacedSticker = {
+      lat,
+      lng,
+      type: selectedStickerType,
+    };
 
-    if (booleanPointInPolygon(pt, poly)) {
-      const newSticker: PlacedSticker = {
-        lat,
-        lng,
-        type: selectedStickerType,
-      };
-
-      setStickers((prevStickers) => [...prevStickers, newSticker]);
-    } else {
-      toast.error("Please place the sticker within the province boundary!", {
-        toastId: "submit-error",
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        theme: "light",
-        transition: Bounce,
-      });
-    }
+    setStickers((prevStickers) => [...prevStickers, newSticker]);
   };
 
   // function to undo the last placed sticker
@@ -163,12 +139,6 @@ const Map = ({
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <GeoJSON
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            data={combinedGeoJson as any}
-            style={{ color: "blue", weight: 1, fillOpacity: 0 }}
-            interactive={false} // Important: allows clicks to pass through to the map
           />
 
           <SearchField />
