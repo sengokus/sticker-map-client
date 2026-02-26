@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, createContext, useContext } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 import { getResponseStatus } from "../network/locations";
 
@@ -20,9 +20,10 @@ export function SubmissionGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
-    if (pathname?.startsWith("/admin")) return;
+    if ((pathname?.startsWith("/admin") || pathname?.startsWith("/result"))) return;
 
     (async () => {
       const { data } = await supabase.auth.getSession();
@@ -55,7 +56,7 @@ export function SubmissionGuard({ children }: { children: React.ReactNode }) {
     })();
   }, [pathname]);
 
-  if (pathname?.startsWith("/admin")) {
+  if ((pathname?.startsWith("/admin") || pathname?.startsWith("/result"))) {
     return <>{children}</>;
   }
 
@@ -73,9 +74,16 @@ export function SubmissionGuard({ children }: { children: React.ReactNode }) {
             <h1 className="text-2xl font-bold text-[#48BF7E] mb-4">
               Thank you for your response
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 mb-6">
               You have already submitted a response to this survey.
             </p>
+            <button
+                  onClick={() => router.push("/result")}
+                  className={`py-3 px-6 rounded-[25px] font-medium bg-[#48BF7E] hover:bg-[#48BF7E]/80 text-white transition-all cursor-pointer`}
+                >
+                  Show Responses
+                </button>
+
           </div>
         </div>
       </main>
